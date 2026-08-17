@@ -1018,6 +1018,15 @@ footer p {
     max-width: 100%;
   }
 
+  .expense-form input[type="date"] {
+    display: block;
+    width: calc(100% - 38px) !important;
+    min-width: 0 !important;
+    max-width: calc(100% - 38px) !important;
+    appearance: none;
+    -webkit-appearance: none;
+  }
+
   .expense-form .form-button {
     margin-top: 0;
   }
