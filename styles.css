@@ -1009,6 +1009,15 @@ footer p {
     grid-column: 1;
   }
 
+  .expense-form .field,
+  .expense-form input,
+  .expense-form .money-input,
+  .expense-form .money-input input {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+  }
+
   .expense-form .form-button {
     margin-top: 0;
   }
