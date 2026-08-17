@@ -12,8 +12,8 @@
     <link rel="apple-touch-icon" href="icon-512.png">
     <meta name="theme-color" content="#10583f">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <link rel="stylesheet" href="styles.css?v=20260817-15">
-    <script type="module" src="app.js?v=20260817-16"></script>
+    <link rel="stylesheet" href="styles.css?v=20260817-16">
+    <script type="module" src="app.js?v=20260817-17"></script>
   </head>
   <body>
     <header class="app-header">
@@ -212,9 +212,37 @@
             <h2 id="extra-expenses-title">Gastos mensuales</h2>
             <p id="extra-expenses-summary" class="section-description">Todavía no cargaste gastos extra.</p>
           </div>
-          <div class="total-card" aria-live="polite">
-            <span id="extra-expenses-total-label">Total del mes</span>
-            <strong id="extra-expenses-total">$ 0,00</strong>
+          <div class="monthly-summary">
+            <form id="monthly-budget-form" class="budget-card" novalidate>
+              <label id="monthly-budget-label" for="monthly-budget-amount">Dinero del mes</label>
+              <div class="budget-entry">
+                <div class="money-input">
+                  <span aria-hidden="true">$</span>
+                  <input
+                    id="monthly-budget-amount"
+                    name="monthly-budget-amount"
+                    type="text"
+                    inputmode="decimal"
+                    placeholder="0,00"
+                    aria-describedby="monthly-budget-error"
+                    required
+                  >
+                </div>
+                <button id="monthly-budget-submit" class="button button-secondary" type="submit">Guardar</button>
+              </div>
+              <p id="monthly-budget-error" class="form-message" aria-live="polite"></p>
+            </form>
+
+            <div id="monthly-available-card" class="available-card" aria-live="polite">
+              <span id="monthly-available-label">Disponible del mes</span>
+              <strong id="monthly-available">$ 0,00</strong>
+              <small id="monthly-available-hint">Definí el dinero del mes</small>
+            </div>
+
+            <div class="total-card" aria-live="polite">
+              <span id="extra-expenses-total-label">Total del mes</span>
+              <strong id="extra-expenses-total">$ 0,00</strong>
+            </div>
           </div>
         </div>
 

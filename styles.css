@@ -675,6 +675,113 @@ select[aria-invalid="true"] {
   white-space: nowrap;
 }
 
+.monthly-summary {
+  display: grid;
+  width: min(100%, 350px);
+  gap: 10px;
+}
+
+.monthly-summary .total-card {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.budget-card {
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--surface-soft);
+}
+
+.budget-card > label {
+  display: block;
+  margin-bottom: 7px;
+  color: var(--ink);
+  font-size: 0.76rem;
+  font-weight: 800;
+}
+
+.budget-entry {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: stretch;
+  gap: 8px;
+}
+
+.budget-entry .money-input,
+.budget-entry .money-input input {
+  width: 100%;
+  min-width: 0;
+}
+
+.budget-entry .money-input input,
+.budget-entry .button {
+  min-height: 42px;
+}
+
+.budget-entry .button {
+  padding-inline: 13px;
+}
+
+.budget-card .form-message {
+  grid-column: auto;
+  min-height: 0;
+  margin-top: 6px;
+}
+
+.budget-card .form-message:empty {
+  display: none;
+}
+
+.available-card {
+  width: 100%;
+  padding: 13px 16px;
+  border-radius: 16px;
+  box-sizing: border-box;
+  background: var(--primary);
+  color: #fff;
+  text-align: right;
+  box-shadow: 0 9px 25px rgb(24 132 95 / 18%);
+}
+
+.available-card span,
+.available-card small {
+  display: block;
+}
+
+.available-card span {
+  margin-bottom: 1px;
+  color: #d5f4e7;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.available-card strong {
+  display: block;
+  font-size: 1.35rem;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.available-card small {
+  margin-top: 3px;
+  color: #d5f4e7;
+  font-size: 0.72rem;
+}
+
+.available-card.is-negative {
+  background: var(--danger);
+  box-shadow: 0 9px 25px rgb(181 61 61 / 18%);
+}
+
+.available-card.is-negative span,
+.available-card.is-negative small {
+  color: #ffe1e1;
+}
+
 .list-actions {
   display: flex;
   margin-top: 25px;
@@ -1050,6 +1157,16 @@ footer p {
     align-self: stretch;
     justify-self: stretch;
     box-sizing: border-box;
+  }
+
+  .monthly-summary {
+    width: 100%;
+  }
+
+  .monthly-summary .total-card,
+  .available-card {
+    width: 100%;
+    text-align: left;
   }
 
   .expense-form .form-button {

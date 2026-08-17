@@ -5,6 +5,7 @@
 - La app puede instalarse como PWA desde una URL segura (HTTPS).
 - Incluye `manifest.webmanifest`, un ícono y caché básica para la interfaz.
 - Los cuatro integrantes comparten faltantes y gastos en tiempo real.
+- En Gastos mensuales se puede definir el dinero de cada mes y ver cuánto queda disponible después de restar todos los gastos.
 - `firestore.rules` limita el acceso a las cuatro cuentas familiares, valida el autor de cada gasto y permite que solo ese autor lo elimine.
 - Thomi puede cargar faltantes y gastos del súper, pero no gastos mensuales manuales; esta restricción también se aplica en Firestore.
 
