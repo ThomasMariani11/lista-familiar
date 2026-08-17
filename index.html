@@ -12,8 +12,8 @@
     <link rel="apple-touch-icon" href="icon-512.png">
     <meta name="theme-color" content="#10583f">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <link rel="stylesheet" href="styles.css?v=20260817-17">
-    <script type="module" src="app.js?v=20260817-18"></script>
+    <link rel="stylesheet" href="styles.css?v=20260817-18">
+    <script type="module" src="app.js?v=20260817-19"></script>
   </head>
   <body>
     <header class="app-header">
@@ -32,7 +32,7 @@
     </header>
 
     <main class="app-shell">
-      <div class="app-tabs" role="tablist" aria-label="Secciones de la aplicación">
+      <div id="app-tabs" class="app-tabs" role="tablist" aria-label="Secciones de la aplicación">
         <button
           id="tab-products"
           class="tab-button is-active"
@@ -64,6 +64,18 @@
           tabindex="-1"
         >
           Gastos mensuales
+        </button>
+        <button
+          id="tab-individual-expenses"
+          class="tab-button"
+          type="button"
+          role="tab"
+          aria-selected="false"
+          aria-controls="individual-expenses-panel"
+          tabindex="-1"
+          hidden
+        >
+          Gastos individuales
         </button>
       </div>
 
@@ -325,6 +337,128 @@
         <div class="danger-zone">
           <button id="clear-extra-expenses" class="button button-danger-quiet" type="button" disabled>
             Limpiar gastos cargados manualmente
+          </button>
+        </div>
+      </section>
+
+      <section id="individual-expenses-panel" class="panel expenses-panel" role="tabpanel" aria-labelledby="tab-individual-expenses" hidden>
+        <div class="section-heading expenses-heading">
+          <div>
+            <p class="section-kicker">Control personal</p>
+            <h2>Gastos individuales</h2>
+            <p id="individual-expenses-summary" class="section-description">Todavía no cargaste gastos individuales.</p>
+          </div>
+          <div class="monthly-summary">
+            <form id="individual-budget-form" class="budget-card" novalidate>
+              <label id="individual-budget-label" for="individual-budget-amount">Dinero disponible del mes</label>
+              <div class="budget-entry">
+                <div class="money-input">
+                  <span aria-hidden="true">$</span>
+                  <input
+                    id="individual-budget-amount"
+                    name="individual-budget-amount"
+                    type="text"
+                    inputmode="decimal"
+                    placeholder="0,00"
+                    aria-describedby="individual-budget-error"
+                    required
+                  >
+                </div>
+                <button id="individual-budget-submit" class="button button-secondary" type="submit">Guardar</button>
+              </div>
+              <button id="individual-budget-cancel" class="budget-cancel-button" type="button" hidden>Cancelar</button>
+              <p id="individual-budget-error" class="form-message" aria-live="polite"></p>
+            </form>
+
+            <div id="individual-available-card" class="available-card" aria-live="polite">
+              <span id="individual-available-label">Disponible del mes</span>
+              <strong id="individual-available">$ 0,00</strong>
+              <small id="individual-available-hint">Definí el dinero del mes</small>
+              <button id="individual-budget-edit" class="available-edit-button" type="button" hidden>Modificar</button>
+            </div>
+
+            <div class="total-card" aria-live="polite">
+              <span id="individual-expenses-total-label">Total gastado del mes</span>
+              <strong id="individual-expenses-total">$ 0,00</strong>
+            </div>
+          </div>
+        </div>
+
+        <form id="individual-expense-form" class="entry-form expense-form" novalidate>
+          <div class="field">
+            <label for="individual-expense-date">Fecha</label>
+            <input id="individual-expense-date" name="individual-expense-date" type="date" required>
+          </div>
+
+          <div class="field field-grow">
+            <label for="individual-expense-detail">Detalle</label>
+            <input
+              id="individual-expense-detail"
+              name="individual-expense-detail"
+              type="text"
+              maxlength="100"
+              placeholder="Ej.: Ropa, peluquería, salida"
+              autocomplete="off"
+              required
+            >
+          </div>
+
+          <div class="field">
+            <label for="individual-expense-amount">Monto</label>
+            <div class="money-input">
+              <span aria-hidden="true">$</span>
+              <input
+                id="individual-expense-amount"
+                name="individual-expense-amount"
+                type="text"
+                inputmode="decimal"
+                placeholder="0,00"
+                required
+              >
+            </div>
+          </div>
+
+          <button class="button button-primary form-button" type="submit">
+            <span aria-hidden="true">＋</span>
+            Cargar gasto
+          </button>
+
+          <p id="individual-expense-error" class="form-message" aria-live="polite"></p>
+        </form>
+
+        <div class="month-toolbar">
+          <label for="individual-expense-month-filter">Ver gastos de</label>
+          <select id="individual-expense-month-filter" name="individual-expense-month-filter"></select>
+        </div>
+
+        <div class="list-actions">
+          <h3>Gastos individuales cargados</h3>
+        </div>
+
+        <div id="individual-expenses-empty" class="empty-state">
+          <span class="empty-icon" aria-hidden="true">$</span>
+          <strong id="individual-expenses-empty-title">Sin gastos individuales este mes</strong>
+          <p>Cuando cargues un gasto individual, vas a verlo acá.</p>
+        </div>
+
+        <div id="individual-expenses-table-wrap" class="table-wrap" hidden>
+          <table>
+            <caption class="sr-only">Historial privado de gastos individuales de Mamá</caption>
+            <thead>
+              <tr>
+                <th scope="col">Fecha</th>
+                <th scope="col">Detalle</th>
+                <th scope="col" class="amount-column">Monto</th>
+                <th scope="col"><span class="sr-only">Acciones</span></th>
+              </tr>
+            </thead>
+            <tbody id="individual-expenses-list"></tbody>
+          </table>
+        </div>
+
+        <div class="danger-zone">
+          <button id="clear-individual-expenses" class="button button-danger-quiet" type="button" disabled>
+            Limpiar mis gastos individuales
           </button>
         </div>
       </section>

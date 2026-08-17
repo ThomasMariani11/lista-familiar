@@ -11,6 +11,7 @@ service cloud.firestore {
       ];
     }
     function isThomi() { return request.auth.token.email == 'thomi@lista-familiar.app'; }
+    function isMama() { return request.auth.token.email == 'mama@lista-familiar.app'; }
     function isOwner() { return resource.data.ownerUid == request.auth.uid; }
     function validAuthor() {
       return (
@@ -33,13 +34,22 @@ service cloud.firestore {
       allow delete: if familyMember() && isOwner();
       allow update: if false;
     }
+    match /families/default/mamaIndividualExpenses/{expenseId} {
+      allow read: if familyMember() && isMama();
+      allow create: if familyMember() && isMama() && validAuthor() && request.resource.data.usuarioId == 'mama' && request.resource.data.ownerUid == request.auth.uid;
+      allow delete: if familyMember() && isMama() && isOwner();
+      allow update: if false;
+    }
     match /families/default/meta/monthlyBudgets {
       allow read: if familyMember();
       allow write: if familyMember() && isThomi();
     }
+    match /families/default/meta/mamaIndividualBudgets {
+      allow read, write: if familyMember() && isMama();
+    }
     match /families/default/meta/{documentId} {
-      allow read: if familyMember();
-      allow write: if familyMember() && documentId != 'monthlyBudgets';
+      allow read: if familyMember() && documentId != 'mamaIndividualBudgets';
+      allow write: if familyMember() && documentId != 'monthlyBudgets' && documentId != 'mamaIndividualBudgets';
     }
   }
 }
