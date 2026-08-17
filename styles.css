@@ -1028,13 +1028,20 @@ footer p {
   }
 
   .expenses-heading,
-  .expenses-heading .total-card,
   .expense-form {
     width: 100%;
     max-width: none;
   }
 
+  .expenses-heading {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
   .expenses-heading .total-card {
+    width: auto;
+    min-width: 0;
+    align-self: stretch;
     box-sizing: border-box;
   }
 
