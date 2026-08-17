@@ -1,6 +1,6 @@
 // Identifica esta aplicación web en Firebase. No contiene una clave privada.
 export const firebaseConfig = {
-  apiKey: "AIzaSyDZXyqBb8Z8h_ujZUT_h0DR5Z1hFXBFUZQ",
+  apiKey: "AIzaSyDZXyqBb8Z8h_ujZUT_hQDR5Z1hFXBFUZQ",
   authDomain: "listasuper-311d9.firebaseapp.com",
   projectId: "listasuper-311d9",
   storageBucket: "listasuper-311d9.firebasestorage.app",
