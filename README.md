@@ -4,7 +4,9 @@
 
 - La app puede instalarse como PWA desde una URL segura (HTTPS).
 - Incluye `manifest.webmanifest`, un ícono y caché básica para la interfaz.
-- `firestore.rules` contiene las reglas que permiten a todos leer, pero solo al autor borrar gastos.
+- Los cuatro integrantes comparten faltantes y gastos en tiempo real.
+- `firestore.rules` limita el acceso a las cuatro cuentas familiares, valida el autor de cada gasto y permite que solo ese autor lo elimine.
+- Thomi puede cargar faltantes y gastos del súper, pero no gastos mensuales manuales; esta restricción también se aplica en Firestore.
 
 ## Configuración de Firebase (cuenta de Thomi)
 
@@ -23,5 +25,7 @@
 1. Crear un repositorio público de GitHub para estos archivos.
 2. En GitHub Pages, publicar desde la rama principal y la carpeta raíz.
 3. Abrir la URL final en cada celular y usar “Instalar” (Android) o “Agregar a pantalla de inicio” (iPhone).
+
+URL familiar: <https://thomasmariani11.github.io/lista-familiar/>
 
 > Firebase no debe habilitar modo de prueba ni reglas públicas. La configuración Web publicada no es una clave privada; las reglas y Authentication protegen los datos.
