@@ -1020,11 +1020,22 @@ footer p {
 
   .expense-form input[type="date"] {
     display: block;
-    width: calc(100% - 38px) !important;
+    width: 100% !important;
     min-width: 0 !important;
-    max-width: calc(100% - 38px) !important;
+    max-width: 100% !important;
     appearance: none;
     -webkit-appearance: none;
+  }
+
+  .expenses-heading,
+  .expenses-heading .total-card,
+  .expense-form {
+    width: 100%;
+    max-width: none;
+  }
+
+  .expenses-heading .total-card {
+    box-sizing: border-box;
   }
 
   .expense-form .form-button {
