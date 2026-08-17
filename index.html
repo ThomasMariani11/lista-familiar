@@ -1,0 +1,349 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta
+      name="description"
+      content="Lista del supermercado con categorías y control de gastos, guardada en tu navegador."
+    >
+    <title>Lista del súper</title>
+    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="apple-touch-icon" href="icon-512.png">
+    <meta name="theme-color" content="#10583f">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <link rel="stylesheet" href="styles.css">
+    <script type="module" src="app.js"></script>
+  </head>
+  <body>
+    <header class="app-header">
+      <div class="header-content">
+        <div class="brand-mark" aria-hidden="true">✓</div>
+        <div class="header-copy">
+          <p id="header-eyebrow" class="eyebrow">Para la próxima compra</p>
+          <h1 id="header-title">Productos faltantes</h1>
+          <p id="header-subtitle" class="header-subtitle">Agregá lo que necesitás para tu próxima compra.</p>
+        </div>
+        <button id="user-switcher" class="user-switcher" type="button" aria-label="Cambiar usuario">
+            <span aria-hidden="true">●</span>
+            <span id="active-user-label">Elegí usuario</span>
+        </button>
+      </div>
+    </header>
+
+    <main class="app-shell">
+      <div class="app-tabs" role="tablist" aria-label="Secciones de la aplicación">
+        <button
+          id="tab-products"
+          class="tab-button is-active"
+          type="button"
+          role="tab"
+          aria-selected="true"
+          aria-controls="products-panel"
+        >
+          Faltantes
+        </button>
+        <button
+          id="tab-expenses"
+          class="tab-button"
+          type="button"
+          role="tab"
+          aria-selected="false"
+          aria-controls="expenses-panel"
+          tabindex="-1"
+        >
+          Gastos súper
+        </button>
+        <button
+          id="tab-extra-expenses"
+          class="tab-button"
+          type="button"
+          role="tab"
+          aria-selected="false"
+          aria-controls="extra-expenses-panel"
+          tabindex="-1"
+        >
+          Gastos mensuales
+        </button>
+      </div>
+
+      <section id="products-panel" class="panel products-panel" role="tabpanel" aria-labelledby="tab-products">
+        <div class="section-heading">
+          <div>
+            <p class="section-kicker">Para la próxima compra</p>
+            <h2 id="products-title">Productos faltantes</h2>
+            <p id="products-summary" class="section-description">Tu lista está vacía.</p>
+          </div>
+          <div class="count-badge" aria-hidden="true">
+            <strong id="products-count">0</strong>
+            <span>ítems</span>
+          </div>
+        </div>
+
+        <form id="product-form" class="entry-form product-form" novalidate>
+          <div class="field field-grow">
+            <label for="product-name">Producto</label>
+            <input
+              id="product-name"
+              name="product-name"
+              type="text"
+              maxlength="100"
+              placeholder="Ej.: Café, jabón, bananas"
+              autocomplete="off"
+              required
+            >
+          </div>
+
+          <button class="button button-primary form-button" type="submit">
+            <span aria-hidden="true">＋</span>
+            Agregar
+          </button>
+
+          <p id="product-error" class="form-message" aria-live="polite"></p>
+        </form>
+
+        <div class="list-actions">
+          <h3>Productos cargados</h3>
+          <button id="clear-products" class="button button-danger-quiet" type="button" disabled>
+            Limpiar lista
+          </button>
+        </div>
+
+        <div id="products-list" class="category-list" aria-live="polite"></div>
+      </section>
+
+      <section id="expenses-panel" class="panel expenses-panel" role="tabpanel" aria-labelledby="tab-expenses" hidden>
+        <div class="section-heading expenses-heading">
+          <div>
+            <p class="section-kicker">Historial de compras</p>
+            <h2 id="expenses-title">Gastos súper</h2>
+            <p id="expenses-summary" class="section-description">Todavía no cargaste compras.</p>
+          </div>
+          <div class="total-card" aria-live="polite">
+            <span id="expenses-total-label">Total del mes</span>
+            <strong id="expenses-total">$ 0,00</strong>
+          </div>
+        </div>
+
+        <form id="expense-form" class="entry-form expense-form" novalidate>
+          <div class="field">
+            <label for="expense-date">Fecha</label>
+            <input id="expense-date" name="expense-date" type="date" required>
+          </div>
+
+          <div class="field field-grow">
+            <label for="expense-store">Supermercado</label>
+            <input
+              id="expense-store"
+              name="expense-store"
+              type="text"
+              maxlength="80"
+              placeholder="Ej.: Mercado del barrio"
+              autocomplete="organization"
+              required
+            >
+          </div>
+
+          <div class="field">
+            <label for="expense-amount">Monto total</label>
+            <div class="money-input">
+              <span aria-hidden="true">$</span>
+              <input
+                id="expense-amount"
+                name="expense-amount"
+                type="text"
+                inputmode="decimal"
+                placeholder="0,00"
+                required
+              >
+            </div>
+          </div>
+
+          <button class="button button-primary form-button" type="submit">
+            <span aria-hidden="true">＋</span>
+            Cargar compra
+          </button>
+
+          <p id="expense-error" class="form-message" aria-live="polite"></p>
+        </form>
+
+        <div class="month-toolbar">
+          <label for="expense-month-filter">Ver gastos de</label>
+          <select id="expense-month-filter" name="expense-month-filter"></select>
+        </div>
+
+        <div class="list-actions">
+          <h3>Compras cargadas</h3>
+        </div>
+
+        <div id="expenses-empty" class="empty-state">
+          <span class="empty-icon" aria-hidden="true">$</span>
+          <strong id="expenses-empty-title">Sin gastos este mes</strong>
+          <p id="expenses-empty-description">Cuando cargues una compra, vas a verla acá.</p>
+        </div>
+
+        <div id="expenses-table-wrap" class="table-wrap" hidden>
+          <table>
+            <caption class="sr-only">Historial de compras realizadas</caption>
+            <thead>
+              <tr>
+                <th scope="col">Fecha</th>
+                <th scope="col">Supermercado</th>
+                <th scope="col">Cargó</th>
+                <th scope="col" class="amount-column">Monto</th>
+                <th scope="col"><span class="sr-only">Acciones</span></th>
+              </tr>
+            </thead>
+            <tbody id="expenses-list"></tbody>
+          </table>
+        </div>
+
+        <div class="danger-zone">
+          <button id="clear-expenses" class="button button-danger-quiet" type="button" disabled>
+            Limpiar mis compras
+          </button>
+        </div>
+      </section>
+
+      <section id="extra-expenses-panel" class="panel expenses-panel" role="tabpanel" aria-labelledby="tab-extra-expenses" hidden>
+        <div class="section-heading expenses-heading">
+          <div>
+            <p class="section-kicker">Control mensual</p>
+            <h2 id="extra-expenses-title">Gastos mensuales</h2>
+            <p id="extra-expenses-summary" class="section-description">Todavía no cargaste gastos extra.</p>
+          </div>
+          <div class="total-card" aria-live="polite">
+            <span id="extra-expenses-total-label">Total del mes</span>
+            <strong id="extra-expenses-total">$ 0,00</strong>
+          </div>
+        </div>
+
+        <form id="extra-expense-form" class="entry-form expense-form" novalidate>
+          <div class="field">
+            <label for="extra-expense-date">Fecha</label>
+            <input id="extra-expense-date" name="extra-expense-date" type="date" required>
+          </div>
+
+          <div class="field field-grow">
+            <label for="extra-expense-detail">Detalle</label>
+            <input
+              id="extra-expense-detail"
+              name="extra-expense-detail"
+              type="text"
+              maxlength="100"
+              placeholder="Ej.: Internet, alquiler, salida"
+              autocomplete="off"
+              required
+            >
+          </div>
+
+          <div class="field">
+            <label for="extra-expense-amount">Monto</label>
+            <div class="money-input">
+              <span aria-hidden="true">$</span>
+              <input
+                id="extra-expense-amount"
+                name="extra-expense-amount"
+                type="text"
+                inputmode="decimal"
+                placeholder="0,00"
+                required
+              >
+            </div>
+          </div>
+
+          <button id="extra-expense-submit" class="button button-primary form-button" type="submit">
+            <span aria-hidden="true">＋</span>
+            Cargar gasto
+          </button>
+
+          <p id="extra-expense-error" class="form-message" aria-live="polite"></p>
+          <p id="extra-expense-permission" class="form-message" aria-live="polite" hidden></p>
+        </form>
+
+        <div class="month-toolbar">
+          <label for="extra-expense-month-filter">Ver gastos de</label>
+          <select id="extra-expense-month-filter" name="extra-expense-month-filter"></select>
+        </div>
+
+        <div class="list-actions">
+          <h3>Gastos cargados</h3>
+        </div>
+
+        <div id="extra-expenses-empty" class="empty-state">
+          <span class="empty-icon" aria-hidden="true">$</span>
+          <strong id="extra-expenses-empty-title">Sin gastos extra este mes</strong>
+          <p id="extra-expenses-empty-description">Cuando cargues un gasto, vas a verlo acá.</p>
+        </div>
+
+        <div id="extra-expenses-table-wrap" class="table-wrap" hidden>
+          <table>
+            <caption class="sr-only">Historial de gastos extra</caption>
+            <thead>
+              <tr>
+                <th scope="col">Fecha</th>
+                <th scope="col">Detalle</th>
+                <th scope="col">Cargó</th>
+                <th scope="col" class="amount-column">Monto</th>
+                <th scope="col"><span class="sr-only">Acciones</span></th>
+              </tr>
+            </thead>
+            <tbody id="extra-expenses-list"></tbody>
+          </table>
+        </div>
+
+        <div class="danger-zone">
+          <button id="clear-extra-expenses" class="button button-danger-quiet" type="button" disabled>
+            Limpiar gastos cargados manualmente
+          </button>
+        </div>
+      </section>
+    </main>
+
+    <aside class="install-tip" aria-label="Instalar la aplicación">
+      <strong>Instalá la app</strong>
+      <span>En el menú del navegador elegí “Instalar” o “Agregar a pantalla de inicio”.</span>
+    </aside>
+
+    <dialog id="access-dialog" class="access-dialog" aria-labelledby="access-dialog-title">
+      <div id="user-selection" class="access-form">
+        <div class="access-icon" aria-hidden="true">●</div>
+        <p class="section-kicker">Ingreso a la lista</p>
+        <h2 id="access-dialog-title">¿Quién sos?</h2>
+        <p class="section-description">Elegí tu usuario para ingresar tu código de acceso.</p>
+        <div id="user-menu" class="user-choice-list" role="group" aria-label="Elegir usuario">
+          <button type="button" data-user-id="thomi">Thomi</button>
+          <button type="button" data-user-id="mati">Mati</button>
+          <button type="button" data-user-id="delfi">Delfi</button>
+          <button type="button" data-user-id="mama">Mamá</button>
+        </div>
+        <button id="user-selection-cancel" class="button button-secondary" type="button">Cancelar</button>
+      </div>
+      <form id="access-form" class="access-form" novalidate>
+        <div class="access-icon" aria-hidden="true">●</div>
+        <p class="section-kicker">Cambio de usuario</p>
+        <h2>Ingresá tu código</h2>
+        <p id="access-dialog-description" class="section-description"></p>
+
+        <div class="field">
+          <label for="access-code">Código de acceso</label>
+          <input
+            id="access-code"
+            name="access-code"
+            type="password"
+            inputmode="numeric"
+            autocomplete="one-time-code"
+            maxlength="12"
+            required
+          >
+        </div>
+        <p id="access-error" class="form-message" aria-live="polite"></p>
+
+        <div class="access-actions">
+          <button id="access-cancel" class="button button-secondary" type="button">Cancelar</button>
+          <button class="button button-primary" type="submit">Ingresar</button>
+        </div>
+      </form>
+    </dialog>
+  </body>
+</html>
