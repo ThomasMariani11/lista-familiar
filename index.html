@@ -13,7 +13,7 @@
     <meta name="theme-color" content="#10583f">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <link rel="stylesheet" href="styles.css">
-    <script type="module" src="app.js?v=20260817-6"></script>
+    <script type="module" src="app.js?v=20260817-7"></script>
   </head>
   <body>
     <header class="app-header">
@@ -327,16 +327,18 @@
 
         <div class="field">
           <label for="access-code">Código de acceso</label>
-          <input
-            id="access-code"
-            name="access-code"
-            type="password"
-            inputmode="text"
-            autocomplete="current-password"
-            maxlength="12"
-            required
-          >
-          <button id="toggle-access-code" class="password-toggle" type="button" aria-label="Mostrar contraseña">Ver</button>
+          <div class="password-control">
+            <input
+              id="access-code"
+              name="access-code"
+              type="password"
+              inputmode="text"
+              autocomplete="current-password"
+              maxlength="12"
+              required
+            >
+            <button id="toggle-access-code" class="password-toggle" type="button" aria-label="Mostrar contraseña">Ver</button>
+          </div>
         </div>
         <p id="access-error" class="form-message" aria-live="polite"></p>
 

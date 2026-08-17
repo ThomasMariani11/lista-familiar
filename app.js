@@ -5,6 +5,9 @@ import { firebaseConfig } from "./firebase-config.js?v=20260816-4";
 
 if ("serviceWorker" in navigator) window.addEventListener("load", () => navigator.serviceWorker.register("./service-worker.js"));
 
+["gesturestart", "gesturechange", "gestureend"].forEach((eventName) => document.addEventListener(eventName, (event) => event.preventDefault(), { passive: false }));
+document.addEventListener("touchmove", (event) => { if (event.touches.length > 1) event.preventDefault(); }, { passive: false });
+
 const FAMILY = ["families", "default"];
 const LEGACY_KEY = "shopping-list";
 const MIGRATION_KEY = "shopping-list-firebase-imported";

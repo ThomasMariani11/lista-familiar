@@ -874,18 +874,22 @@ footer p {
   position: relative;
 }
 
-.access-form .field input {
-  padding-right: 62px;
+.password-control {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+}
+
+.password-control input {
+  min-width: 0;
+  flex: 1;
 }
 
 .password-toggle {
-  position: absolute;
-  right: 8px;
-  bottom: 6px;
-  min-width: 48px;
-  height: 34px;
+  min-width: 56px;
+  height: 46px;
   border: 0;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   background: var(--primary-light);
   color: var(--primary-dark);
   font-size: 0.76rem;
