@@ -734,6 +734,19 @@ select[aria-invalid="true"] {
   display: none;
 }
 
+.budget-cancel-button {
+  display: block;
+  margin: 8px 0 0 auto;
+  padding: 4px 0;
+  border: 0;
+  background: transparent;
+  color: var(--ink-soft);
+  font: inherit;
+  font-size: 0.76rem;
+  font-weight: 750;
+  cursor: pointer;
+}
+
 .available-card {
   width: 100%;
   padding: 13px 16px;
@@ -770,6 +783,24 @@ select[aria-invalid="true"] {
   margin-top: 3px;
   color: #d5f4e7;
   font-size: 0.72rem;
+}
+
+.available-edit-button {
+  margin-top: 9px;
+  padding: 6px 11px;
+  border: 1px solid rgb(255 255 255 / 55%);
+  border-radius: 9px;
+  background: rgb(255 255 255 / 12%);
+  color: #fff;
+  font: inherit;
+  font-size: 0.76rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.available-edit-button:hover,
+.available-edit-button:focus-visible {
+  background: rgb(255 255 255 / 22%);
 }
 
 .available-card.is-negative {

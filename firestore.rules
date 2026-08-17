@@ -33,8 +33,13 @@ service cloud.firestore {
       allow delete: if familyMember() && isOwner();
       allow update: if false;
     }
+    match /families/default/meta/monthlyBudgets {
+      allow read: if familyMember();
+      allow write: if familyMember() && isThomi();
+    }
     match /families/default/meta/{documentId} {
-      allow read, write: if familyMember();
+      allow read: if familyMember();
+      allow write: if familyMember() && documentId != 'monthlyBudgets';
     }
   }
 }
