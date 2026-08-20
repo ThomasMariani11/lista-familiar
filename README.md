@@ -6,7 +6,7 @@
 - Incluye `manifest.webmanifest`, un ícono y caché básica para la interfaz.
 - Los cuatro integrantes comparten faltantes y gastos en tiempo real.
 - En Gastos mensuales, solo Thomi puede definir o modificar el dinero de cada mes; los demás usuarios ven cuánto queda disponible después de restar todos los gastos.
-- Mamá tiene una pestaña privada de gastos individuales, con disponible mensual propio y registros separados que solo ella puede consultar y administrar.
+- Mamá y Delfi tienen una pestaña privada de gastos individuales, cada una con disponible mensual y registros separados que solo su dueña puede consultar y administrar.
 - `firestore.rules` limita el acceso a las cuatro cuentas familiares, valida el autor de cada gasto y permite que solo ese autor lo elimine.
 - Thomi puede cargar faltantes y gastos del súper, pero no gastos mensuales manuales; esta restricción también se aplica en Firestore.
 
