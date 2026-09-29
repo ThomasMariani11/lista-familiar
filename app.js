@@ -14,6 +14,7 @@ const MIGRATION_KEY = "shopping-list-firebase-imported";
 const USERS = {
   thomi: { name: "Thomi", email: "thomi@lista-familiar.app", monthly: false },
   mati: { name: "Mati", email: "mati@lista-familiar.app", monthly: true },
+  papa: { name: "Papá", email: "papa@lista-familiar.app", monthly: true },
   delfi: { name: "Delfi", email: "delfi@lista-familiar.app", monthly: true },
   mama: { name: "Mamá", email: "mama@lista-familiar.app", monthly: true },
 };
