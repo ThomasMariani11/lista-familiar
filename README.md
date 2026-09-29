@@ -4,6 +4,7 @@
 
 - La app puede instalarse como PWA desde una URL segura (HTTPS).
 - Incluye `manifest.webmanifest`, un ícono y caché básica para la interfaz.
+- Busca actualizaciones cada 15 segundos mientras está visible, al volver a la app y al recuperar conexión. Aplica la nueva versión automáticamente cuando no hay formularios en edición, diálogos abiertos ni operaciones pendientes.
 - Los cinco integrantes comparten faltantes y gastos en tiempo real.
 - Papá tiene las mismas funciones que Mati: administra faltantes, carga compras del súper y gastos mensuales, consulta el disponible y puede eliminar sus propios gastos. No tiene sección individual ni puede modificar el presupuesto familiar.
 - En Gastos mensuales, solo Thomi puede definir o modificar el dinero de cada mes; los demás usuarios ven cuánto queda disponible después de restar todos los gastos.
@@ -33,5 +34,7 @@ Si la app ya está publicada, para habilitar a Papá hay que crear `papa@lista-f
 3. Abrir la URL final en cada celular y usar “Instalar” (Android) o “Agregar a pantalla de inicio” (iPhone).
 
 URL familiar: <https://thomasmariani11.github.io/lista-familiar/>
+
+Para cada nueva publicación, incrementar `CACHE_NAME` en `service-worker.js` y la versión de los recursos modificados en `index.html`. Esto dispara la actualización automática de las apps abiertas. La primera instalación de esta función requiere recargar una vez la versión anterior. GitHub Pages debe terminar de publicar antes de que los dispositivos puedan detectar el cambio.
 
 > Firebase no debe habilitar modo de prueba ni reglas públicas. La configuración Web publicada no es una clave privada; las reglas y Authentication protegen los datos.

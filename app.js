@@ -3,7 +3,51 @@ import { getAuth, browserLocalPersistence, setPersistence, signInWithEmailAndPas
 import { getFirestore, collection, doc, addDoc, deleteDoc, updateDoc, setDoc, getDocs, writeBatch, onSnapshot } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 import { firebaseConfig } from "./firebase-config.js?v=20260816-4";
 
-if ("serviceWorker" in navigator) window.addEventListener("load", () => navigator.serviceWorker.register("./service-worker.js"));
+let pendingActions = 0;
+const editedForms = new Set();
+document.addEventListener("input", (event) => {
+  if (event.target.form) editedForms.add(event.target.form);
+});
+function canApplyUpdate() {
+  if (pendingActions || document.querySelector("dialog[open]") || document.activeElement?.closest("form")) return false;
+  for (const form of editedForms) {
+    const hasDraft = [...form.querySelectorAll('input:not([type="date"])')].some((input) => input.value.trim());
+    if (hasDraft) return false;
+  }
+  return true;
+}
+if ("serviceWorker" in navigator) {
+  let updateReady = false, reloading = false, checking = false;
+  let controlled = Boolean(navigator.serviceWorker.controller);
+  const applyUpdate = () => {
+    if (!updateReady || reloading || document.visibilityState !== "visible" || !canApplyUpdate()) return;
+    reloading = true;
+    window.location.reload();
+  };
+  navigator.serviceWorker.addEventListener("controllerchange", () => {
+    // The first installation already has the current page; avoid a needless reload.
+    if (controlled) updateReady = true;
+    controlled = true;
+    applyUpdate();
+  });
+  window.addEventListener("load", async () => {
+    try {
+      const registration = await navigator.serviceWorker.register("./service-worker.js", { updateViaCache: "none" });
+      const checkUpdate = async () => {
+        if (checking || !navigator.onLine || document.visibilityState !== "visible") return;
+        checking = true;
+        try { await registration.update(); } catch (error) { console.warn("No se pudo comprobar la actualización", error); }
+        finally { checking = false; }
+        applyUpdate();
+      };
+      window.setInterval(checkUpdate, 15000);
+      window.setInterval(applyUpdate, 1000);
+      window.addEventListener("online", checkUpdate);
+      document.addEventListener("visibilitychange", checkUpdate);
+      await checkUpdate();
+    } catch (error) { console.warn("No se pudo registrar la actualización automática", error); }
+  });
+}
 
 ["gesturestart", "gesturechange", "gestureend"].forEach((eventName) => document.addEventListener(eventName, (event) => event.preventDefault(), { passive: false }));
 document.addEventListener("touchmove", (event) => { if (event.touches.length > 1) event.preventDefault(); }, { passive: false });
@@ -83,6 +127,23 @@ function bind() {
   [[el.productName,el.productError],[el.expenseDate,el.expenseError],[el.expenseStore,el.expenseError],[el.extraDate,el.extraError],[el.extraDetail,el.extraError],[el.individualDate,el.individualError],[el.individualDetail,el.individualError]].forEach(([input,message]) => input.oninput = () => clearError(input,message));
   [[el.expenseAmount,el.expenseError],[el.extraAmount,el.extraError],[el.budgetAmount,el.budgetError],[el.individualAmount,el.individualError],[el.individualBudgetAmount,el.individualBudgetError]].forEach(([input,message]) => input.oninput = () => { input.value = amountTyping(input.value); clearError(input,message); });
   el.accessCode.oninput = () => clearError(el.accessCode, el.accessError);
+  el.dialog.addEventListener("close", () => editedForms.delete(el.accessForm));
+  el.budgetCancel.addEventListener("click", () => editedForms.delete(el.budgetForm));
+  el.individualBudgetCancel.addEventListener("click", () => editedForms.delete(el.individualBudgetForm));
+  // Keep automatic updates from interrupting writes and preserve unfinished forms.
+  for (const node of Object.values(el)) {
+    for (const property of ["onsubmit", "onclick", "onchange"]) {
+      const handler = node[property];
+      if (handler?.constructor.name !== "AsyncFunction") continue;
+      node[property] = async function(event) {
+        pendingActions++;
+        try {
+          await handler.call(this, event);
+          if (property === "onsubmit" && ![...node.querySelectorAll(".form-message")].some((message) => message.textContent.trim())) editedForms.delete(node);
+        } finally { pendingActions--; }
+      };
+    }
+  }
 }
 function subscribe() {
   stop();
