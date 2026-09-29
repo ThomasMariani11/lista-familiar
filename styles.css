@@ -1322,3 +1322,7 @@ footer p {
     transition-duration: 0.01ms !important;
   }
 }
+
+.app-tabs.only-individual {
+  grid-template-columns: minmax(0, 1fr);
+}

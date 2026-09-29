@@ -5,10 +5,11 @@
 - La app puede instalarse como PWA desde una URL segura (HTTPS).
 - Incluye `manifest.webmanifest`, un ícono y caché básica para la interfaz.
 - Busca actualizaciones cada 15 segundos mientras está visible, al volver a la app y al recuperar conexión. Aplica la nueva versión automáticamente cuando no hay formularios en edición, diálogos abiertos ni operaciones pendientes.
-- Los cinco integrantes comparten faltantes y gastos en tiempo real.
+- Thomi, Mati, Papá y Delfi comparten faltantes y gastos en tiempo real. Mamá entra directamente a Gastos individuales; su interfaz no muestra ni carga las secciones compartidas.
 - Papá tiene las mismas funciones que Mati: administra faltantes, carga compras del súper y gastos mensuales, consulta el disponible y puede eliminar sus propios gastos. No tiene sección individual ni puede modificar el presupuesto familiar.
 - En Gastos mensuales, solo Thomi puede definir o modificar el dinero de cada mes; los demás usuarios ven cuánto queda disponible después de restar todos los gastos.
 - Mamá y Delfi tienen una pestaña privada de gastos individuales, cada una con disponible mensual y registros separados que solo su dueña puede consultar y administrar.
+- La vista exclusiva de Mamá es una restricción de interfaz. Las reglas actuales conservan sus permisos sobre los datos compartidos; revocar ese acceso requiere un cambio de reglas aparte.
 - `firestore.rules` limita el acceso a las cinco cuentas familiares, valida el autor de cada gasto y permite que solo ese autor lo elimine.
 - Thomi puede cargar faltantes y gastos del súper, pero no gastos mensuales manuales; esta restricción también se aplica en Firestore.
 
