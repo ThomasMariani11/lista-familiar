@@ -36,6 +36,6 @@ Si la app ya está publicada, para habilitar a Papá hay que crear `papa@lista-f
 
 URL familiar: <https://thomasmariani11.github.io/lista-familiar/>
 
-Para cada nueva publicación, incrementar `CACHE_NAME` en `service-worker.js` y la versión de los recursos modificados en `index.html`. Esto dispara la actualización automática de las apps abiertas. La primera instalación de esta función requiere recargar una vez la versión anterior. GitHub Pages debe terminar de publicar antes de que los dispositivos puedan detectar el cambio.
+Para cada nueva publicación, incrementar `CACHE_NAME` en `service-worker.js`, usar el mismo valor en `APP_VERSION` de `app.js` y actualizar la versión de los recursos modificados en `index.html`. Esto dispara la actualización automática de las apps abiertas. También se compara la versión del worker activo para detectar actualizaciones cuyo evento de activación haya ocurrido antes de abrir la página. La primera instalación de esta función requiere recargar una vez la versión anterior. GitHub Pages debe terminar de publicar antes de que los dispositivos puedan detectar el cambio.
 
 > Firebase no debe habilitar modo de prueba ni reglas públicas. La configuración Web publicada no es una clave privada; las reglas y Authentication protegen los datos.

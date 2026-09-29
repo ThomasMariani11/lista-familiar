@@ -9,7 +9,7 @@ document.addEventListener("input", (event) => {
   if (event.target.form) editedForms.add(event.target.form);
 });
 function canApplyUpdate() {
-  if (pendingActions || document.querySelector("dialog[open]") || document.activeElement?.closest("form")) return false;
+  if (pendingActions || document.querySelector("dialog[open]")) return false;
   for (const form of editedForms) {
     const hasDraft = [...form.querySelectorAll('input:not([type="date"])')].some((input) => input.value.trim());
     if (hasDraft) return false;
@@ -17,6 +17,7 @@ function canApplyUpdate() {
   return true;
 }
 if ("serviceWorker" in navigator) {
+  const APP_VERSION = "lista-familiar-v12";
   let updateReady = false, reloading = false, checking = false;
   let controlled = Boolean(navigator.serviceWorker.controller);
   const applyUpdate = () => {
@@ -30,6 +31,11 @@ if ("serviceWorker" in navigator) {
     controlled = true;
     applyUpdate();
   });
+  navigator.serviceWorker.addEventListener("message", (event) => {
+    if (event.data?.type !== "APP_VERSION" || typeof event.data.version !== "string") return;
+    if (event.data.version !== APP_VERSION) updateReady = true;
+    applyUpdate();
+  });
   window.addEventListener("load", async () => {
     try {
       const registration = await navigator.serviceWorker.register("./service-worker.js", { updateViaCache: "none" });
@@ -38,6 +44,7 @@ if ("serviceWorker" in navigator) {
         checking = true;
         try { await registration.update(); } catch (error) { console.warn("No se pudo comprobar la actualización", error); }
         finally { checking = false; }
+        registration.active?.postMessage({ type: "GET_APP_VERSION" });
         applyUpdate();
       };
       window.setInterval(checkUpdate, 15000);
