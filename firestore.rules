@@ -33,7 +33,7 @@ service cloud.firestore {
     }
     match /families/default/monthlyExpenses/{expenseId} {
       allow read: if familyMember();
-      allow create: if familyMember() && !isThomi() && validAuthor() && request.resource.data.ownerUid == request.auth.uid;
+      allow create: if familyMember() && validAuthor() && request.resource.data.ownerUid == request.auth.uid;
       allow delete: if familyMember() && isOwner();
       allow update: if false;
     }

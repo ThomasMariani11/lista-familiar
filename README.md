@@ -11,7 +11,7 @@
 - Mamá y Delfi tienen una pestaña privada de gastos individuales, cada una con disponible mensual y registros separados que solo su dueña puede consultar y administrar.
 - La vista exclusiva de Mamá es una restricción de interfaz. Las reglas actuales conservan sus permisos sobre los datos compartidos; revocar ese acceso requiere un cambio de reglas aparte.
 - `firestore.rules` limita el acceso a las cinco cuentas familiares, valida el autor de cada gasto y permite que solo ese autor lo elimine.
-- Thomi puede cargar faltantes y gastos del súper, pero no gastos mensuales manuales; esta restricción también se aplica en Firestore.
+- Thomi puede cargar faltantes, gastos del súper y gastos mensuales manuales. Conserva el permiso exclusivo para modificar el presupuesto familiar.
 
 ## Configuración de Firebase (cuenta de Thomi)
 

@@ -1,4 +1,4 @@
-const CACHE_NAME = "lista-familiar-v12";
+const CACHE_NAME = "lista-familiar-v13";
 self.addEventListener("message", (event) => {
   if (event.data?.type === "GET_APP_VERSION") event.source?.postMessage({ type: "APP_VERSION", version: CACHE_NAME });
 });
