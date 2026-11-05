@@ -17,7 +17,7 @@ function canApplyUpdate() {
   return true;
 }
 if ("serviceWorker" in navigator) {
-  const APP_VERSION = "lista-familiar-v13";
+  const APP_VERSION = "lista-familiar-v14";
   let updateReady = false, reloading = false, checking = false;
   let controlled = Boolean(navigator.serviceWorker.controller);
   const applyUpdate = () => {
