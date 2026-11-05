@@ -3,7 +3,7 @@
 // Solo responde a integrantes de la familia con una sesión válida de Firebase.
 
 // Deben coincidir exactamente con CATEGORIES de app.js.
-const CATEGORIES = ["Almacén", "Limpieza", "Frutas y Verduras", "Carnes", "Lácteos", "Bebidas", "Higiene", "Otros"];
+const CATEGORIES = ["Frutas y Verduras", "Carnes", "Fiambrería", "Lácteos", "Panadería", "Almacén", "Congelados", "Bebidas", "Limpieza", "Higiene", "Mascotas", "Otros"];
 const DEFAULT_MODEL = "gemini-3.5-flash-lite";
 const GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/interactions";
 const FIREBASE_KEYS_URL = "https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com";
@@ -12,9 +12,11 @@ const GEMINI_TIMEOUT_MS = 8000;
 const SYSTEM_INSTRUCTION = [
   "Clasificás productos de una lista de supermercado de una familia de Argentina.",
   `Respondé solo con una de estas categorías: ${CATEGORIES.join(", ")}.`,
-  "Guía: Almacén incluye secos, enlatados, panificados, condimentos, infusiones y congelados.",
-  "Carnes incluye vacuna, pollo, cerdo, pescados y fiambres. Lácteos incluye leche, quesos, yogur, manteca y huevos.",
-  "Higiene es cuidado personal. Limpieza es limpieza del hogar. Si no estás seguro, usá Otros.",
+  "Guía: Almacén incluye secos, enlatados, snacks, dulces, condimentos e infusiones.",
+  "Carnes incluye vacuna, pollo, cerdo y pescados frescos. Fiambrería incluye jamón, salame y otros fiambres.",
+  "Lácteos incluye leche, quesos, yogur, manteca y huevos. Panadería incluye pan, facturas y tapas de tarta o empanadas.",
+  "Congelados incluye helados y comidas congeladas. Mascotas incluye alimento y accesorios para animales.",
+  "Higiene es cuidado personal y botiquín. Limpieza es limpieza del hogar. Si no estás seguro, usá Otros.",
 ].join(" ");
 
 let cachedKeys = null;

@@ -18,7 +18,7 @@ function canApplyUpdate() {
   return true;
 }
 if ("serviceWorker" in navigator) {
-  const APP_VERSION = "lista-familiar-v17";
+  const APP_VERSION = "lista-familiar-v18";
   let updateReady = false, reloading = false, checking = false;
   let controlled = Boolean(navigator.serviceWorker.controller);
   const applyUpdate = () => {
@@ -74,10 +74,14 @@ const INDIVIDUAL_ACCOUNTS = {
   delfi: { expenses: "delfiIndividualExpenses", budgets: "delfiIndividualBudgets" },
   mama: { expenses: "mamaIndividualExpenses", budgets: "mamaIndividualBudgets" },
 };
-const CATEGORIES = ["Almacén", "Limpieza", "Frutas y Verduras", "Carnes", "Lácteos", "Bebidas", "Higiene", "Otros"];
+const CATEGORIES = ["Frutas y Verduras", "Carnes", "Fiambrería", "Lácteos", "Panadería", "Almacén", "Congelados", "Bebidas", "Limpieza", "Higiene", "Mascotas", "Otros"];
 const RULES = [
   ["Frutas y Verduras", "banana manzana naranja mandarina limon papa batata cebolla tomate lechuga zanahoria morron pimiento zapallo calabaza brocoli espinaca palta ajo frutilla uva"],
   ["Carnes", "carne pollo pescado milanesa chorizo hamburguesa salchicha bondiola cerdo asado"],
+  ["Fiambrería", "jamon salame mortadela fiambre leberwurst bondiolita"],
+  ["Congelados", "congelado helado nugget patitas"],
+  ["Mascotas", "perro gato balanceado mascota piedritas"],
+  ["Panadería", "medialuna factura bizcocho pan lactal"],
   ["Lácteos", "leche queso yogur manteca crema huevo"],
   ["Bebidas", "agua gaseosa jugo cerveza vino soda bebida energizante"],
   ["Limpieza", "detergente lavandina desinfectante limpiador esponja trapo bolsa basura papel cocina suavizante"],
