@@ -1,0 +1,17 @@
+name = "lista-familiar-categorias"
+main = "worker.js"
+compatibility_date = "2026-10-01"
+
+# La clave NO va acá. Se carga como secreto:
+#   npx wrangler secret put GEMINI_API_KEY        (producción)
+#   archivo server/.dev.vars                     (local, ignorado por git)
+
+[vars]
+# Modelo con nivel gratuito según https://ai.google.dev/gemini-api/docs/pricing
+# Se puede cambiar sin tocar el código (por ejemplo "gemini-3.1-flash-lite").
+GEMINI_MODEL = "gemini-3.5-flash-lite"
+# minimal | low | medium | high. Vacío = valor predeterminado del modelo.
+GEMINI_THINKING_LEVEL = "minimal"
+FIREBASE_PROJECT_ID = "listasuper-311d9"
+ALLOWED_EMAILS = "thomi@lista-familiar.app,mati@lista-familiar.app,papa@lista-familiar.app,delfi@lista-familiar.app,mama@lista-familiar.app"
+ALLOWED_ORIGINS = "https://thomasmariani11.github.io,http://localhost:5180"

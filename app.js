@@ -2,6 +2,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/fireba
 import { getAuth, browserLocalPersistence, setPersistence, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
 import { getFirestore, collection, doc, addDoc, deleteDoc, updateDoc, setDoc, getDocs, writeBatch, onSnapshot } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 import { firebaseConfig } from "./firebase-config.js?v=20260816-4";
+import { CATEGORIZER_URL } from "./categorizer-config.js?v=20261105-2";
 
 let pendingActions = 0;
 const editedForms = new Set();
@@ -17,7 +18,7 @@ function canApplyUpdate() {
   return true;
 }
 if ("serviceWorker" in navigator) {
-  const APP_VERSION = "lista-familiar-v15";
+  const APP_VERSION = "lista-familiar-v17";
   let updateReady = false, reloading = false, checking = false;
   let controlled = Boolean(navigator.serviceWorker.controller);
   const applyUpdate = () => {
@@ -101,6 +102,7 @@ let user = null, userId = null, pending = null, unsubs = [];
 let state = { faltantes: [], gastos: [], gastosExtra: [], gastosIndividuales: [], presupuestos: {}, presupuestosIndividuales: {}, categorias: {} };
 let expenseMonth = monthKey(today()), extraMonth = monthKey(today()), individualMonth = monthKey(today());
 let editingBudget = false;
+let addingProduct = false;
 let editingIndividualBudget = false;
 
 el.expenseDate.value = today(); el.extraDate.value = today(); el.individualDate.value = today(); bind(); render();
@@ -182,11 +184,57 @@ function togglePassword() { const visible = el.accessCode.type === "text"; el.ac
 
 function selectTab(tab) { if(userId === "mama") tab="individual"; if(tab==="expenses")tab="products"; if(tab==="individual"&&!individualAccount())tab="products";const info={products:[el.productsTab,el.productsPanel,"Para la próxima compra","Productos faltantes","Agregá lo que necesitás para tu próxima compra."],expenses:[el.expensesTab,el.expensesPanel,"Historial de compras","Gastos súper","Registrá y consultá las compras del supermercado."],extra:[el.extraTab,el.extraPanel,"Control mensual","Gastos mensuales","Llevá el detalle de tus gastos fuera del supermercado."],individual:[el.individualTab,el.individualPanel,"Control personal","Gastos individuales","Tu espacio privado para controlar los gastos personales."]}; Object.entries(info).forEach(([key,[button,panel]])=>{const on=key===tab; button.classList.toggle("is-active",on); button.setAttribute("aria-selected",on); button.tabIndex=on?0:-1; panel.hidden=!on;}); const [, ,eyebrow,title,subtitle]=info[tab]; el.eyebrow.textContent=eyebrow;el.title.textContent=title;el.subtitle.textContent=subtitle; }
 
-async function addProduct(event) { event.preventDefault(); const nombre=el.productName.value.trim(); if (!isLogged()) return error(el.productName,el.productError,"Elegí tu usuario antes de agregar un producto."); if (!nombre) return error(el.productName,el.productError,"Escribí el nombre del producto antes de agregarlo."); const normalizedName=norm(nombre); if (state.faltantes.some((p)=>norm(p.nombre)===normalizedName)) return error(el.productName,el.productError,`“${nombre}” ya está en la lista. No se agregó un producto repetido.`); const category=categorize(nombre); try { await setDoc(doc(db,...FAMILY,"products",encodeURIComponent(normalizedName)),{nombre,categoria:category.categoria,requiereCategoria:category.requiereCategoria}); el.productName.value="";clearError(el.productName,el.productError);el.productName.focus(); } catch { writeError(el.productName,el.productError); } }
-function categorize(nombre) { const n=norm(nombre); if (CATEGORIES.includes(state.categorias[n])) return {categoria:state.categorias[n],requiereCategoria:false}; const found=RULES.find((rule)=>rule.words.some((word)=>n.includes(word))); return found ? {categoria:found.category,requiereCategoria:false}:{categoria:"Otros",requiereCategoria:true}; }
+async function addProduct(event) {
+  event.preventDefault();
+  const nombre=el.productName.value.trim();
+  if (!isLogged()) return error(el.productName,el.productError,"Elegí tu usuario antes de agregar un producto.");
+  if (!nombre) return error(el.productName,el.productError,"Escribí el nombre del producto antes de agregarlo.");
+  const normalizedName=norm(nombre);
+  if (state.faltantes.some((p)=>norm(p.nombre)===normalizedName)) return error(el.productName,el.productError,`“${nombre}” ya está en la lista. No se agregó un producto repetido.`);
+  if (addingProduct) return;
+  addingProduct=true; pendingActions++; setProductBusy(true);
+  try {
+    const category=await categorize(nombre);
+    await setDoc(doc(db,...FAMILY,"products",encodeURIComponent(normalizedName)),{nombre,categoria:category.categoria,requiereCategoria:category.requiereCategoria});
+    if (category.origen==="gemini") rememberCategory(normalizedName,category.categoria).catch(console.warn);
+    el.productName.value="";clearError(el.productName,el.productError);
+    if (category.aviso) el.productError.textContent=category.aviso;
+    el.productName.focus();
+  } catch { writeError(el.productName,el.productError); }
+  finally { addingProduct=false; pendingActions--; setProductBusy(false); }
+}
+// 1) Clasificación guardada (de Gemini o corregida a mano) 2) Gemini 3) palabras clave 4) "Otros".
+async function categorize(nombre) {
+  const n=norm(nombre);
+  if (CATEGORIES.includes(state.categorias[n])) return {categoria:state.categorias[n],requiereCategoria:false,origen:"memoria"};
+  if (CATEGORIZER_URL) {
+    const result=await askCategorizer(nombre);
+    if (result.categoria) return {categoria:result.categoria,requiereCategoria:false,origen:"gemini"};
+    const motivo=result.limite?"Se alcanzó el límite gratuito de clasificación automática.":"No se pudo clasificar automáticamente.";
+    return {categoria:"Otros",requiereCategoria:true,origen:"respaldo",aviso:`${motivo} “${nombre}” quedó en Otros; podés elegir la categoría.`};
+  }
+  // Sin servidor configurado: palabras clave como antes.
+  const found=RULES.find((rule)=>rule.words.some((word)=>n.includes(word)));
+  if (found) return {categoria:found.category,requiereCategoria:false,origen:"reglas"};
+  return {categoria:"Otros",requiereCategoria:true,origen:"respaldo"};
+}
+async function askCategorizer(nombre) {
+  const controller=new AbortController(), timer=setTimeout(()=>controller.abort(),10000);
+  try {
+    const token=await user.getIdToken();
+    const response=await fetch(`${CATEGORIZER_URL.replace(/[/]+$/,"")}/categorize`,{method:"POST",headers:{"Content-Type":"application/json",Authorization:`Bearer ${token}`},body:JSON.stringify({producto:nombre}),signal:controller.signal});
+    if (response.status===429) return {limite:true};
+    if (!response.ok) return {};
+    const data=await response.json();
+    return CATEGORIES.includes(data?.categoria)?{categoria:data.categoria}:{};
+  } catch (reason) { console.warn("Clasificación automática no disponible",reason); return {}; }
+  finally { clearTimeout(timer); }
+}
+function rememberCategory(normalizedName,categoria) { return setDoc(doc(db,...FAMILY,"meta","categories"),{items:{[normalizedName]:categoria}},{merge:true}); }
+function setProductBusy(busy) { const submit=el.productForm.querySelector("button[type=submit]"); submit.disabled=busy; el.productName.readOnly=busy; submit.lastChild.textContent=busy?" Clasificando…":" Agregar"; }
 async function removeProduct(event) { const button=event.target.closest("button[data-product-id]"); if(button) await remove("products",button.dataset.productId,el.productError); }
 async function clearProducts() { if(state.faltantes.length && await confirmAction("¿Querés eliminar todos los productos faltantes? Esta acción no se puede deshacer.", "Limpiar lista")) await removeMany("products",state.faltantes.map((p)=>p.id),el.productError); }
-async function changeCategory(event) { const select=event.target.closest("select[data-product-id]"); if(!select||!CATEGORIES.includes(select.value))return; const product=state.faltantes.find((p)=>p.id===select.dataset.productId);if(!product)return;try{await Promise.all([updateDoc(doc(db,...FAMILY,"products",product.id),{categoria:select.value,requiereCategoria:false}),setDoc(doc(db,...FAMILY,"meta","categories"),{items:{...state.categorias,[norm(product.nombre)]:select.value}})]);}catch{writeError(select,el.productError);} }
+async function changeCategory(event) { const select=event.target.closest("select[data-product-id]"); if(!select||!CATEGORIES.includes(select.value))return; const product=state.faltantes.find((p)=>p.id===select.dataset.productId);if(!product)return;try{await Promise.all([updateDoc(doc(db,...FAMILY,"products",product.id),{categoria:select.value,requiereCategoria:false}),rememberCategory(norm(product.nombre),select.value)]);clearError(select,el.productError);}catch{writeError(select,el.productError);} }
 
 async function addSuper(event) { event.preventDefault(); const fecha=el.expenseDate.value,supermercado=el.expenseStore.value.trim(),monto=parseAmount(el.expenseAmount.value); if(!isLogged())return error(el.expenseStore,el.expenseError,"Elegí tu usuario antes de cargar una compra."); if(!fecha)return error(el.expenseDate,el.expenseError,"Seleccioná la fecha de la compra.");if(!supermercado)return error(el.expenseStore,el.expenseError,"Escribí el nombre del supermercado.");if(!Number.isFinite(monto)||monto<=0)return error(el.expenseAmount,el.expenseError,"Ingresá un monto mayor que cero.");try{await addDoc(collection(db,...FAMILY,"superExpenses"),{fecha,supermercado,monto,usuarioId:userId,ownerUid:user.uid,createdAt:Date.now()});expenseMonth=monthKey(fecha);el.expenseStore.value="";el.expenseAmount.value="";el.expenseDate.value=today();clearError(el.expenseStore,el.expenseError);el.expenseStore.focus();}catch{writeError(el.expenseStore,el.expenseError);} }
 async function removeSuper(event) {const button=event.target.closest("button[data-expense-id]");if(button)await remove("superExpenses",button.dataset.expenseId,el.expenseError);}
@@ -209,7 +257,7 @@ async function removeMany(collectionName,ids,message){try{const batch=writeBatch
 function render(){renderUser();renderProducts();renderExpenses();renderExtra();renderIndividual();}
 function renderUser(){const onlyIndividual=userId==="mama";const hasIndividual=Boolean(individualAccount());el.expensesTab.hidden=true;[el.productsTab,el.extraTab].forEach((tab)=>tab.hidden=onlyIndividual);el.tabs.classList.toggle("only-individual",onlyIndividual);if(onlyIndividual)selectTab("individual");el.activeUserLabel.textContent=isLogged()?nameOf(userId):"Elegí usuario";el.userMenu.querySelectorAll("button[data-user-id]").forEach((button)=>button.setAttribute("aria-current",button.dataset.userId===userId));el.individualTab.hidden=!hasIndividual;el.tabs.classList.toggle("has-individual",hasIndividual);if(!hasIndividual&&el.individualTab.classList.contains("is-active"))selectTab("products");}
 function renderProducts(){el.productsList.replaceChildren();el.productsCount.textContent=state.faltantes.length;el.productsSummary.textContent=state.faltantes.length?`Tenés ${state.faltantes.length} productos pendientes.`:"Tu lista está vacía.";el.clearProducts.disabled=!state.faltantes.length;if(!state.faltantes.length){el.productsList.append(html('<div class="empty-state"><span class="empty-icon">✓</span><strong>La lista está al día</strong><p>Agregá un producto y su categoría aparecerá automáticamente.</p></div>'));return;}CATEGORIES.forEach((category)=>{const products=state.faltantes.filter((p)=>p.categoria===category);if(products.length)el.productsList.append(categoryGroup(category,products));});}
-function categoryGroup(category,products){const section=html(`<section class="category-group"><div class="category-header"><h3 class="category-title"><span class="category-dot"></span><span>${category}</span></h3><span class="category-quantity">${products.length===1?"1 producto":`${products.length} productos`}</span></div></section>`);const list=document.createElement("ul");list.className="product-items";products.forEach((product)=>{const item=document.createElement("li");item.className="product-item";const title=document.createElement("span");title.className="product-name";title.textContent=product.nombre;const actions=document.createElement("div");actions.className="product-actions";if(product.requiereCategoria){const select=document.createElement("select");select.className="product-category-select";select.dataset.productId=product.id;select.append(option("Elegir categoría","",true),...CATEGORIES.map((c)=>option(c,c)));actions.append(select);}const button=document.createElement("button");button.type="button";button.className="remove-button";button.dataset.productId=product.id;button.textContent="Quitar";actions.append(button);item.append(title,actions);list.append(item);});section.append(list);return section;}
+function categoryGroup(category,products){const section=html(`<section class="category-group"><div class="category-header"><h3 class="category-title"><span class="category-dot"></span><span>${category}</span></h3><span class="category-quantity">${products.length===1?"1 producto":`${products.length} productos`}</span></div></section>`);const list=document.createElement("ul");list.className="product-items";products.forEach((product)=>{const item=document.createElement("li");item.className="product-item";const title=document.createElement("span");title.className="product-name";title.textContent=product.nombre;const actions=document.createElement("div");actions.className="product-actions";{const select=document.createElement("select");select.className="product-category-select";select.classList.toggle("needs-category",Boolean(product.requiereCategoria));select.dataset.productId=product.id;select.setAttribute("aria-label",`Categoría de ${product.nombre}`);if(product.requiereCategoria)select.append(option("Elegir categoría","",true));select.append(...CATEGORIES.map((c)=>option(c,c)));if(!product.requiereCategoria)select.value=product.categoria;actions.append(select);}const button=document.createElement("button");button.type="button";button.className="remove-button";button.dataset.productId=product.id;button.textContent="Quitar";actions.append(button);item.append(title,actions);list.append(item);});section.append(list);return section;}
 function renderExpenses(){const months=monthsFor(state.gastos);if(!months.includes(expenseMonth))expenseMonth=monthKey(today());monthOptions(el.expenseMonth,months,expenseMonth);const items=itemsFor(state.gastos,expenseMonth);tableState(items,el.expensesList,el.expensesEmpty,el.expensesWrap,el.expensesTotal,el.expensesTotalLabel,el.expensesSummary,el.expensesEmptyTitle,el.expensesEmptyDescription,expenseMonth,"Cuando cargues una compra, vas a verla acá.",false);el.clearExpenses.disabled=!state.gastos.some((x)=>x.ownerUid===user?.uid);}
 function renderExtra(){const all=[...state.gastosExtra,...state.gastos.map((x)=>({...x,origen:"super",detalle:`Compra de súper: ${x.supermercado}`}))];const months=[...new Set([...monthsFor(all),...Object.keys(state.presupuestos).filter((id)=>/^\d{4}-\d{2}$/.test(id))])].sort();if(!months.includes(extraMonth))extraMonth=monthKey(today());monthOptions(el.extraMonth,months,extraMonth);const items=itemsFor(all,extraMonth);tableState(items,el.extraList,el.extraEmpty,el.extraWrap,el.extraTotal,el.extraTotalLabel,el.extraSummary,el.extraEmptyTitle,el.extraEmptyDescription,extraMonth,"Cuando cargues un gasto, vas a verlo acá.",true);renderMonthlyBudget(items);const enabled=Boolean(userId&&userId!=="mama"&&USERS[userId].monthly);[el.extraDate,el.extraDetail,el.extraAmount,el.extraSubmit].forEach((input)=>input.disabled=!enabled);el.extraPermission.hidden=enabled;el.extraPermission.textContent=enabled?"":"Elegí un usuario para poder cargar gastos mensuales.";el.clearExtra.disabled=!state.gastosExtra.some((x)=>x.ownerUid===user?.uid);}
 function renderMonthlyBudget(items){const record=state.presupuestos[extraMonth],hasBudget=Number.isFinite(Number(record?.monto)),isThomi=userId==="thomi",showForm=isThomi&&(!hasBudget||editingBudget),budget=hasBudget?Number(record.monto):0,spent=items.reduce((sum,x)=>sum+x.monto,0),available=hasBudget?budget-spent:0,label=monthLabel(extraMonth);el.budgetForm.hidden=!showForm;el.budgetEdit.hidden=!(isThomi&&hasBudget&&!editingBudget);el.budgetCancel.hidden=!(hasBudget&&editingBudget);el.budgetSubmit.textContent=hasBudget?"Guardar cambios":"Guardar";el.budgetLabel.textContent=`Dinero para ${label}`;el.availableLabel.textContent=`Disponible en ${label}`;el.availableAmount.textContent=money.format(available);el.availableHint.textContent=!hasBudget?(isThomi?"Definí el dinero del mes":"Thomi todavía no definió el dinero del mes"):available<0?"Superaste el dinero disponible":"Luego de restar todos los gastos";el.extraTotalLabel.textContent=`Total gastado en ${label}`;el.availableCard.classList.toggle("is-negative",hasBudget&&available<0);el.budgetSubmit.disabled=!isThomi;if(document.activeElement!==el.budgetAmount)el.budgetAmount.value=hasBudget?amountForInput(budget):"";}

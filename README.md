@@ -28,6 +28,41 @@
 
 Si la app ya está publicada, para habilitar a Papá hay que crear `papa@lista-familiar.app` en Authentication con su contraseña, publicar las reglas actualizadas de `firestore.rules` y publicar los archivos de la app. Agregar el botón no crea automáticamente la cuenta de Firebase.
 
+## Categorización automática con Gemini
+
+Al agregar un producto, la app busca su categoría en este orden:
+
+1. **Memoria familiar** (`families/default/meta/categories`): clasificaciones ya hechas por Gemini o corregidas a mano. Si está, no se consulta a Gemini.
+2. **Gemini**, a través del servidor de `server/`. La respuesta se valida contra las categorías permitidas y se guarda en la memoria.
+3. **Otros**, si Gemini falla o se alcanzó el límite gratuito. El producto se agrega igual, con aviso y el selector resaltado para elegir la categoría.
+
+Si `categorizer-config.js` no tiene URL, se usan las palabras clave de `RULES` en `app.js` como antes.
+
+Cada producto tiene un selector de categoría. Cambiarlo corrige el producto y actualiza la memoria, así la próxima vez se usa la corrección.
+
+La clave `GEMINI_API_KEY` vive solo en el servidor (un Cloudflare Worker gratuito). El servidor verifica la sesión de Firebase y solo atiende a las cinco cuentas familiares.
+
+### Configuración (una sola vez)
+
+1. Crear la clave en <https://aistudio.google.com/apikey> (proyecto sin facturación = nivel gratuito).
+2. Crear una cuenta gratuita en Cloudflare y, desde la carpeta `server/`:
+   ```bash
+   npx wrangler login
+   npx wrangler secret put GEMINI_API_KEY
+   npx wrangler deploy
+   ```
+3. Copiar la URL que muestra `deploy` (`https://lista-familiar-categorias.<cuenta>.workers.dev`) en `categorizer-config.js` y publicar la app.
+
+El modelo se cambia en `server/wrangler.toml` (`GEMINI_MODEL`) y se aplica con `npx wrangler deploy`. Antes de cambiarlo, verificar en <https://ai.google.dev/gemini-api/docs/pricing> que tenga nivel gratuito. Si el modelo no acepta `GEMINI_THINKING_LEVEL = "minimal"`, dejarlo vacío.
+
+### Prueba local
+
+1. Crear `server/.dev.vars` (ignorado por git) con `GEMINI_API_KEY=tu_clave`.
+2. En `server/`, ejecutar `npx wrangler dev` (queda en `http://localhost:8787`).
+3. Poner temporalmente `http://localhost:8787` en `categorizer-config.js` y abrir la app en `http://localhost:5180`.
+
+Antes de publicar, volver a dejar la URL de producción en `categorizer-config.js`.
+
 ## Publicación
 
 1. Crear un repositorio público de GitHub para estos archivos.

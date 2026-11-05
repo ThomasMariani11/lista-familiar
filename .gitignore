@@ -1,0 +1,6 @@
+# Secretos locales del servidor de categorías
+.dev.vars
+.env
+server/.dev.vars
+server/.wrangler/
+node_modules/

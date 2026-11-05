@@ -1,8 +1,8 @@
-const CACHE_NAME = "lista-familiar-v15";
+const CACHE_NAME = "lista-familiar-v17";
 self.addEventListener("message", (event) => {
   if (event.data?.type === "GET_APP_VERSION") event.source?.postMessage({ type: "APP_VERSION", version: CACHE_NAME });
 });
-const APP_SHELL = ["./", "./index.html", "./styles.css", "./app.js", "./manifest.webmanifest", "./icon-512.png"];
+const APP_SHELL = ["./", "./index.html", "./styles.css", "./app.js", "./categorizer-config.js", "./firebase-config.js", "./manifest.webmanifest", "./icon-512.png"];
 self.addEventListener("install", (event) => { event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(APP_SHELL))); self.skipWaiting(); });
 self.addEventListener("activate", (event) => { event.waitUntil(caches.keys().then((keys) => Promise.all(keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key)))).then(() => self.clients.claim())); });
 self.addEventListener("fetch", (event) => {
